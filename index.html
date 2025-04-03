@@ -183,11 +183,13 @@
             <div class="signature-toggle-buttons">
                 <button type="button" id="drawButton" class="active" onclick="switchSignatureMode('draw')">Draw Signature</button>
                 <button type="button" id="typeButton" onclick="switchSignatureMode('type')">Type Signature</button>
+                <button type="button" id="uploadButton" onclick="switchSignatureMode('upload')">Upload Signature</button>
             </div>
 
             <!-- Signature Canvas -->
             <canvas class="signature-box" id="signatureCanvas"></canvas>
             <input type="text" class="signature-text" id="typedSignature" placeholder="Type your signature here">
+            <input type="file" id="uploadSignature" class="signature-upload" accept="image/*" style="display:none;" onchange="uploadSignature(event)">
             <button type="button" class="clear-signature" onclick="clearSignature()">Clear Signature</button>
 
             <label for="signDate1">Date:</label>
@@ -203,8 +205,11 @@
         const typedSignatureInput = document.getElementById("typedSignature");
         const drawSignatureButton = document.getElementById("drawButton");
         const typeSignatureButton = document.getElementById("typeButton");
+        const uploadSignatureButton = document.getElementById("uploadButton");
+        const uploadInput = document.getElementById("uploadSignature");
 
         let drawing = false;
+        let uploadedImage = null;
 
         // Function to get mouse position relative to the canvas
         function getMousePos(canvas, event) {
@@ -215,7 +220,7 @@
         }
 
         function startDrawing(event) {
-            if (!drawSignatureButton.classList.contains('active')) return;
+            if (!drawSignatureButton.classList.contains('active') || uploadedImage) return;
             drawing = true;
             const pos = getMousePos(canvas, event);
             ctx.beginPath();
@@ -223,7 +228,7 @@
         }
 
         function draw(event) {
-            if (!drawing || !drawSignatureButton.classList.contains('active')) return;
+            if (!drawing || !drawSignatureButton.classList.contains('active') || uploadedImage) return;
             const pos = getMousePos(canvas, event);
             ctx.lineTo(pos.x, pos.y);
             ctx.stroke();
@@ -236,35 +241,17 @@
         function clearSignature() {
             ctx.clearRect(0, 0, canvas.width, canvas.height);
             typedSignatureInput.value = '';
+            uploadedImage = null;
         }
 
         function switchSignatureMode(mode) {
             if (mode === 'draw') {
                 canvas.style.display = 'block';
                 typedSignatureInput.style.display = 'none';
+                uploadInput.style.display = 'none';
                 drawSignatureButton.classList.add('active');
                 typeSignatureButton.classList.remove('active');
-            } else {
+                uploadSignatureButton.classList.remove('active');
+            } else if (mode === 'type') {
                 canvas.style.display = 'none';
-                typedSignatureInput.style.display = 'block';
-                typeSignatureButton.classList.add('active');
-                drawSignatureButton.classList.remove('active');
-            }
-        }
-
-        canvas.addEventListener("mousedown", startDrawing);
-        canvas.addEventListener("mousemove", draw);
-        canvas.addEventListener("mouseup", stopDrawing);
-        canvas.addEventListener("mouseleave", stopDrawing);
-
-        document.getElementById("checkoutForm").addEventListener("submit", function(event) {
-            event.preventDefault();
-            alert("Form submitted successfully!");
-        });
-
-        // Initialize with draw mode
-        switchSignatureMode('draw');
-    </script>
-
-</body>
-</html>
+                typedSignatureInput.style.display = '

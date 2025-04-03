@@ -254,4 +254,51 @@
                 uploadSignatureButton.classList.remove('active');
             } else if (mode === 'type') {
                 canvas.style.display = 'none';
-                typedSignatureInput.style.display = '
+                typedSignatureInput.style.display = 'block';
+                uploadInput.style.display = 'none';
+                typeSignatureButton.classList.add('active');
+                drawSignatureButton.classList.remove('active');
+                uploadSignatureButton.classList.remove('active');
+            } else if (mode === 'upload') {
+                canvas.style.display = 'none';
+                typedSignatureInput.style.display = 'none';
+                uploadInput.style.display = 'block';
+                uploadSignatureButton.classList.add('active');
+                drawSignatureButton.classList.remove('active');
+                typeSignatureButton.classList.remove('active');
+            }
+        }
+
+        function uploadSignature(event) {
+            const file = event.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const img = new Image();
+                    img.onload = function() {
+                        uploadedImage = img;
+                        ctx.clearRect(0, 0, canvas.width, canvas.height);
+                        ctx.drawImage(uploadedImage, 0, 0, canvas.width, canvas.height);
+                    };
+                    img.src = e.target.result;
+                };
+                reader.readAsDataURL(file);
+            }
+        }
+
+        canvas.addEventListener("mousedown", startDrawing);
+        canvas.addEventListener("mousemove", draw);
+        canvas.addEventListener("mouseup", stopDrawing);
+        canvas.addEventListener("mouseleave", stopDrawing);
+
+        document.getElementById("checkoutForm").addEventListener("submit", function(event) {
+            event.preventDefault();
+            alert("Form submitted successfully!");
+        });
+
+        // Initialize with draw mode
+        switchSignatureMode('draw');
+    </script>
+
+</body>
+</html>

@@ -20,26 +20,44 @@
             margin: 30px auto;
             box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
             border-radius: 10px;
+            text-align: left;
         }
         .logo {
-            width: 150px;
-            margin-bottom: 20px;
+            width: 200px; /* Bigger logo */
+            display: block;
+            margin: 0 auto 20px;
         }
         h2 {
+            text-align: center;
             color: #333;
         }
         label {
             font-weight: bold;
-            display: block;
-            text-align: left;
+            display: flex;
+            align-items: center;
             margin-top: 10px;
         }
-        input, textarea {
+        input, textarea, select {
             width: 100%;
             padding: 8px;
             margin-top: 5px;
             border: 1px solid #ccc;
             border-radius: 5px;
+            font-size: 14px;
+        }
+        /* Make date fields narrower */
+        input[type="date"] {
+            width: 150px;
+        }
+        /* Align checkboxes closer to text */
+        .radio-group {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-top: 5px;
+        }
+        .radio-group input {
+            margin: 0;
         }
         button {
             background: #007BFF;
@@ -66,63 +84,10 @@
         <h2>Tenant Checkout Form</h2>
         
         <form id="checkoutForm">
+            <label for="date">Date:</label>
+            <input type="date" id="date" name="date" required>
+
             <label for="property">Property Address:</label>
             <input type="text" id="property" name="property" required>
 
             <label for="tenants">Tenant/s:</label>
-            <textarea id="tenants" name="tenants" rows="2" required></textarea>
-
-            <label for="moveout">Move-Out Date:</label>
-            <input type="date" id="moveout" name="moveout" required>
-
-            <input type="radio" id="good" name="condition" value="Good and clean state" required>
-            <label for="good">Good and clean state</label>
-
-            <input type="radio" id="minor" name="condition" value="Minor damages">
-            <label for="minor">Minor damages</label>
-            <input type="text" id="minorDetails" name="minorDetails" placeholder="Specify damages (if any)">
-
-            <input type="radio" id="disrepair" name="condition" value="Disrepair">
-            <label for="disrepair">Disrepair</label>
-            <input type="text" id="disrepairDetails" name="disrepairDetails" placeholder="Specify disrepair (if any)">
-
-            <label for="gasReading">Gas Meter Reading:</label>
-            <input type="text" id="gasReading" name="gasReading" required>
-
-            <label for="gasSupplier">Gas Supplier:</label>
-            <input type="text" id="gasSupplier" name="gasSupplier" required>
-
-            <label for="electricReading">Electricity Meter Reading:</label>
-            <input type="text" id="electricReading" name="electricReading" required>
-
-            <label for="electricSupplier">Electricity Supplier:</label>
-            <input type="text" id="electricSupplier" name="electricSupplier" required>
-
-            <label for="tenantName1">Tenant Name (print):</label>
-            <input type="text" id="tenantName1" name="tenantName1" required>
-
-            <label for="tenantName2">Tenant Name (print) (if applicable):</label>
-            <input type="text" id="tenantName2" name="tenantName2">
-
-            <label for="signature1">Signature:</label>
-            <input type="text" id="signature1" name="signature1" required>
-
-            <label for="signature2">Signature (if applicable):</label>
-            <input type="text" id="signature2" name="signature2">
-
-            <label for="signDate1">Date:</label>
-            <input type="date" id="signDate1" name="signDate1" required>
-
-            <button type="submit">Submit</button>
-        </form>
-    </div>
-
-    <script>
-        document.getElementById("checkoutForm").addEventListener("submit", function(event) {
-            event.preventDefault();
-            alert("Form submitted successfully!");
-        });
-    </script>
-
-</body>
-</html>

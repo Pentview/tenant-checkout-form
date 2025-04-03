@@ -130,6 +130,8 @@
         
         <form id="checkoutForm">
             <h2>General Information</h2>
+            <label for="date">Date:</label>
+            <input type="date" id="date" name="date" required>
 
             <label for="property">Property Address:</label>
             <input type="text" id="property" name="property" required>
@@ -204,16 +206,26 @@
 
         let drawing = false;
 
+        // Function to get mouse position relative to the canvas
+        function getMousePos(canvas, event) {
+            const rect = canvas.getBoundingClientRect();
+            const x = event.clientX - rect.left;
+            const y = event.clientY - rect.top;
+            return { x, y };
+        }
+
         function startDrawing(event) {
             if (!drawSignatureButton.classList.contains('active')) return;
             drawing = true;
+            const pos = getMousePos(canvas, event);
             ctx.beginPath();
-            ctx.moveTo(event.offsetX, event.offsetY);
+            ctx.moveTo(pos.x, pos.y);
         }
 
         function draw(event) {
             if (!drawing || !drawSignatureButton.classList.contains('active')) return;
-            ctx.lineTo(event.offsetX, event.offsetY);
+            const pos = getMousePos(canvas, event);
+            ctx.lineTo(pos.x, pos.y);
             ctx.stroke();
         }
 

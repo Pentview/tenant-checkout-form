@@ -1,97 +1,354 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Tenant Checkout Form</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f4f4f4;
+      margin: 0;
+      padding: 0;
+    }
+
+    .container {
+      width: 95%;
+      max-width: 700px;
+      background: white;
+      padding: 20px;
+      margin: 30px auto;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+      border-radius: 10px;
+    }
+
+    .logo {
+      width: 180px;
+      display: block;
+      margin: 0 auto 20px;
+    }
+
+    h1, h2 {
+      text-align: center;
+      color: #333;
+    }
+
+    h2 {
+      font-size: 18px;
+      color: #007BFF;
+      margin-top: 30px;
+    }
+
+    label {
+      font-weight: bold;
+      display: block;
+      margin-top: 15px;
+    }
+
+    input, textarea, select {
+      width: 100%;
+      padding: 10px;
+      font-size: 14px;
+      margin-top: 5px;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+    }
+
+    .checkbox-group {
+      display: flex;
+      align-items: center;
+      margin-top: 5px;
+    }
+
+    .checkbox-group input {
+      width: 16px;
+      height: 16px;
+      margin-right: 8px;
+    }
+
+    .signature-box {
+      border: 2px dashed #999;
+      width: 100%;
+      height: 120px;
+      margin-top: 10px;
+      border-radius: 6px;
+      background: #fff;
+      cursor: crosshair;
+    }
+
+    .signature-text, .signature-upload {
+      display: none;
+      margin-top: 10px;
+    }
+
+    .signature-preview {
+      margin-top: 10px;
+      max-height: 100px;
+      display: none;
+    }
+
+    .signature-toggle-buttons {
+      display: flex;
+      gap: 10px;
+      margin-top: 15px;
+    }
+
+    .signature-toggle-buttons button {
+      flex: 1;
+      padding: 10px;
+      font-size: 14px;
+      border: none;
+      background: #007BFF;
+      color: white;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+
+    .signature-toggle-buttons button.active {
+      background: #0056b3;
+    }
+
+    button.clear-signature {
+      background: red;
+      color: white;
+      width: 100%;
+      margin-top: 10px;
+      border-radius: 6px;
+      padding: 8px;
+    }
+
+    button[type="submit"] {
+      background: #28a745;
+      width: 100%;
+      font-size: 16px;
+      margin-top: 30px;
+    }
+
+    @media (max-width: 500px) {
+      .signature-toggle-buttons {
+        flex-direction: column;
+      }
+    }
+  </style>
+</head>
+<body>
+<div class="container">
+  <img src="logo.png" alt="Company Logo" class="logo" />
+  <h1>Tenant Checkout Form</h1>
+
+  <form id="checkoutForm" action="https://formspree.io/f/xgvanyjp" method="POST">
+    <!-- General Information -->
+    <h2>General Information</h2>
+
+    <label for="property">Property Address:</label>
+    <input type="text" id="property" name="property" required>
+
+    <label for="tenants">Tenant/s:</label>
+    <textarea id="tenants" name="tenants" required></textarea>
+
+    <label for="secondTenant">Second Tenant (if applicable):</label>
+    <input type="text" id="secondTenant" name="secondTenant">
+
+    <label for="moveout">Move-Out Date:</label>
+    <input type="date" id="moveout" name="moveout" required>
+
+    <!-- Property Condition -->
+    <h2>Property Condition</h2>
+
+    <div class="checkbox-group">
+      <input type="checkbox" id="good" name="condition" value="Good and clean state">
+      <label for="good">Good and clean state</label>
+    </div>
+
+    <div class="checkbox-group">
+      <input type="checkbox" id="minor" name="condition" value="Minor damages">
+      <label for="minor">Minor damages</label>
+    </div>
+    <input type="text" name="minorDetails" placeholder="Specify damages (if any)">
+
+    <div class="checkbox-group">
+      <input type="checkbox" id="disrepair" name="condition" value="Disrepair">
+      <label for="disrepair">Disrepair</label>
+    </div>
+    <input type="text" name="disrepairDetails" placeholder="Specify disrepair (if any)">
+
+    <!-- Utilities -->
+    <h2>Utility Readings</h2>
+    <label>Gas Meter Reading:</label>
+    <input type="text" name="gasReading" required>
+
+    <label>Gas Supplier:</label>
+    <input type="text" name="gasSupplier" required>
+
+    <label>Electricity Meter Reading:</label>
+    <input type="text" name="electricReading" required>
+
+    <label>Electricity Supplier:</label>
+    <input type="text" name="electricSupplier" required>
+
+    <!-- Signature Sections -->
+    <h2>Tenant 1 Signature</h2>
+    <label>Name:</label>
+    <input type="text" name="tenantName1" required>
+
+    <div class="signature-toggle-buttons" data-signature="1">
+      <button type="button" class="active" onclick="switchSignatureMode('draw', 1)">Draw</button>
+      <button type="button" onclick="switchSignatureMode('type', 1)">Type</button>
+      <button type="button" onclick="switchSignatureMode('upload', 1)">Upload</button>
+    </div>
+
+    <canvas class="signature-box" id="signatureCanvas1"></canvas>
+    <input type="text" class="signature-text" id="typedSignature1" placeholder="Type your signature here">
+    <input type="file" class="signature-upload" id="uploadSignature1" accept="image/*" onchange="uploadSignature(event, 1)">
+    <img class="signature-preview" id="previewSignature1">
+    <input type="hidden" name="signatureImage1" id="signatureImage1">
+    <button type="button" class="clear-signature" onclick="clearSignature(1)">Clear Signature</button>
+
+    <label>Date:</label>
+    <input type="date" name="signDate1" required>
+
+    <h2>Tenant 2 Signature</h2>
+    <label>Name:</label>
+    <input type="text" name="tenantName2">
+
+    <div class="signature-toggle-buttons" data-signature="2">
+      <button type="button" class="active" onclick="switchSignatureMode('draw', 2)">Draw</button>
+      <button type="button" onclick="switchSignatureMode('type', 2)">Type</button>
+      <button type="button" onclick="switchSignatureMode('upload', 2)">Upload</button>
+    </div>
+
+    <canvas class="signature-box" id="signatureCanvas2"></canvas>
+    <input type="text" class="signature-text" id="typedSignature2" placeholder="Type your signature here">
+    <input type="file" class="signature-upload" id="uploadSignature2" accept="image/*" onchange="uploadSignature(event, 2)">
+    <img class="signature-preview" id="previewSignature2">
+    <input type="hidden" name="signatureImage2" id="signatureImage2">
+    <button type="button" class="clear-signature" onclick="clearSignature(2)">Clear Signature</button>
+
+    <label>Date:</label>
+    <input type="date" name="signDate2">
+
+    <button type="submit">Submit</button>
+  </form>
+</div>
+
 <script>
-    const canvas = document.getElementById("signatureCanvas");
+  function setupCanvas(id) {
+    const canvas = document.getElementById("signatureCanvas" + id);
     const ctx = canvas.getContext("2d");
-    const typedSignatureInput = document.getElementById("typedSignature");
-    const drawSignatureButton = document.getElementById("drawButton");
-    const typeSignatureButton = document.getElementById("typeButton");
-    const uploadSignatureButton = document.getElementById("uploadButton");
-    const uploadInput = document.getElementById("uploadSignature");
+    const ratio = window.devicePixelRatio || 1;
+    canvas.width = canvas.offsetWidth * ratio;
+    canvas.height = canvas.offsetHeight * ratio;
+    ctx.scale(ratio, ratio);
+  }
 
-    let drawing = false;
-    let uploadedImage = null;
-    let lastPos = { x: 0, y: 0 };
+  setupCanvas(1);
+  setupCanvas(2);
 
-    // High-DPI fix
-    function setupCanvasResolution() {
-        const ratio = window.devicePixelRatio || 1;
-        canvas.width = canvas.offsetWidth * ratio;
-        canvas.height = canvas.offsetHeight * ratio;
-        canvas.getContext("2d").scale(ratio, ratio);
-    }
+  let drawing = {};
+  let ctxs = {};
+  let lastPos = {};
 
-    setupCanvasResolution();
+  [1, 2].forEach(id => {
+    const canvas = document.getElementById("signatureCanvas" + id);
+    const ctx = canvas.getContext("2d");
+    ctxs[id] = ctx;
 
-    function getMousePos(canvas, event) {
-        const rect = canvas.getBoundingClientRect();
-        return {
-            x: event.clientX - rect.left,
-            y: event.clientY - rect.top
-        };
-    }
+    canvas.addEventListener("mousedown", e => {
+      drawing[id] = true;
+      const pos = getMousePos(canvas, e);
+      ctx.beginPath();
+      ctx.moveTo(pos.x, pos.y);
+    });
 
-    function startDrawing(event) {
-        if (!drawSignatureButton.classList.contains('active') || uploadedImage) return;
-        drawing = true;
-        lastPos = getMousePos(canvas, event);
-        ctx.beginPath();
-        ctx.moveTo(lastPos.x, lastPos.y);
-    }
+    canvas.addEventListener("mousemove", e => {
+      if (!drawing[id]) return;
+      const pos = getMousePos(canvas, e);
+      ctx.lineTo(pos.x, pos.y);
+      ctx.lineWidth = 2;
+      ctx.strokeStyle = "#000";
+      ctx.lineCap = "round";
+      ctx.stroke();
+    });
 
-    function draw(event) {
-        if (!drawing || !drawSignatureButton.classList.contains('active') || uploadedImage) return;
-        const pos = getMousePos(canvas, event);
-        ctx.lineCap = 'round';
-        ctx.lineJoin = 'round';
-        ctx.lineWidth = 2;
-        ctx.strokeStyle = '#000';
-        ctx.lineTo(pos.x, pos.y);
-        ctx.stroke();
-        lastPos = pos;
-    }
+    canvas.addEventListener("mouseup", () => {
+      drawing[id] = false;
+      saveSignature(id);
+    });
 
-    function stopDrawing() {
-        drawing = false;
-        ctx.closePath();
-    }
+    canvas.addEventListener("mouseleave", () => drawing[id] = false);
+  });
 
-    function clearSignature() {
+  function getMousePos(canvas, event) {
+    const rect = canvas.getBoundingClientRect();
+    return {
+      x: event.clientX - rect.left,
+      y: event.clientY - rect.top
+    };
+  }
+
+  function switchSignatureMode(mode, id) {
+    document.getElementById("signatureCanvas" + id).style.display = mode === 'draw' ? 'block' : 'none';
+    document.getElementById("typedSignature" + id).style.display = mode === 'type' ? 'block' : 'none';
+    document.getElementById("uploadSignature" + id).style.display = mode === 'upload' ? 'block' : 'none';
+    document.getElementById("previewSignature" + id).style.display = 'none';
+
+    const buttons = document.querySelector(`.signature-toggle-buttons[data-signature="${id}"]`).querySelectorAll("button");
+    buttons.forEach(btn => btn.classList.remove("active"));
+    buttons[[ 'draw', 'type', 'upload' ].indexOf(mode)].classList.add("active");
+
+    if (mode === 'type') {
+      document.getElementById("typedSignature" + id).addEventListener("input", () => {
+        const ctx = ctxs[id];
         ctx.clearRect(0, 0, canvas.width, canvas.height);
-        typedSignatureInput.value = '';
-        uploadedImage = null;
+        ctx.font = "24px cursive";
+        ctx.fillText(document.getElementById("typedSignature" + id).value, 10, 50);
+        saveSignature(id);
+      });
     }
+  }
 
-    function switchSignatureMode(mode) {
-        canvas.style.display = mode === 'draw' ? 'block' : 'none';
-        typedSignatureInput.style.display = mode === 'type' ? 'block' : 'none';
-        uploadInput.style.display = mode === 'upload' ? 'block' : 'none';
-
-        drawSignatureButton.classList.toggle('active', mode === 'draw');
-        typeSignatureButton.classList.toggle('active', mode === 'type');
-        uploadSignatureButton.classList.toggle('active', mode === 'upload');
+  function uploadSignature(event, id) {
+    const file = event.target.files[0];
+    const canvas = document.getElementById("signatureCanvas" + id);
+    const ctx = canvas.getContext("2d");
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        const img = new Image();
+        img.onload = function() {
+          ctx.clearRect(0, 0, canvas.width, canvas.height);
+          ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+          document.getElementById("previewSignature" + id).src = img.src;
+          document.getElementById("previewSignature" + id).style.display = "block";
+          saveSignature(id);
+        };
+        img.src = e.target.result;
+      };
+      reader.readAsDataURL(file);
     }
+  }
 
-    function uploadSignature(event) {
-        const file = event.target.files[0];
-        if (file) {
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                const img = new Image();
-                img.onload = function() {
-                    uploadedImage = img;
-                    ctx.clearRect(0, 0, canvas.width, canvas.height);
-                    ctx.drawImage(uploadedImage, 0, 0, canvas.width, canvas.height);
-                };
-                img.src = e.target.result;
-            };
-            reader.readAsDataURL(file);
-        }
-    }
+  function saveSignature(id) {
+    const canvas = document.getElementById("signatureCanvas" + id);
+    const dataURL = canvas.toDataURL("image/png");
+    document.getElementById("signatureImage" + id).value = dataURL;
+  }
 
-    canvas.addEventListener("mousedown", startDrawing);
-    canvas.addEventListener("mousemove", draw);
-    canvas.addEventListener("mouseup", stopDrawing);
-    canvas.addEventListener("mouseleave", stopDrawing);
+  function clearSignature(id) {
+    const canvas = document.getElementById("signatureCanvas" + id);
+    const ctx = canvas.getContext("2d");
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    document.getElementById("typedSignature" + id).value = '';
+    document.getElementById("uploadSignature" + id).value = '';
+    document.getElementById("previewSignature" + id).style.display = 'none';
+    document.getElementById("signatureImage" + id).value = '';
+  }
 
-    // Set default mode
-    switchSignatureMode('draw');
+  window.onload = () => {
+    switchSignatureMode('draw', 1);
+    switchSignatureMode('draw', 2);
+  }
 </script>
+</body>
+</html>

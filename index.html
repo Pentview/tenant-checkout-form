@@ -179,22 +179,45 @@
 
             <!-- Signature Toggle -->
             <div class="signature-toggle-buttons">
-                <button type="button" id="drawButton" class="active" onclick="switchSignatureMode('draw')">Draw Signature</button>
-                <button type="button" id="typeButton" onclick="switchSignatureMode('type')">Type Signature</button>
-                <button type="button" id="uploadButton" onclick="switchSignatureMode('upload')">Upload Signature</button>
+                <button type="button" id="drawButton1" class="active" onclick="switchSignatureMode(1, 'draw')">Draw Signature 1</button>
+                <button type="button" id="typeButton1" onclick="switchSignatureMode(1, 'type')">Type Signature 1</button>
+                <button type="button" id="uploadButton1" onclick="switchSignatureMode(1, 'upload')">Upload Signature 1</button>
             </div>
 
-            <!-- Signature Canvas -->
-            <canvas class="signature-box" id="signatureCanvas"></canvas>
-            <input type="text" class="signature-text" id="typedSignature" placeholder="Type your signature here">
-            <input type="file" id="uploadSignature" class="signature-upload" accept="image/*" style="display:none;" onchange="uploadSignature(event)">
-            <button type="button" class="clear-signature" onclick="clearSignature()">Clear Signature</button>
+            <!-- Signature Canvas 1 -->
+            <canvas class="signature-box" id="signatureCanvas1"></canvas>
+            <input type="text" class="signature-text" id="typedSignature1" placeholder="Type your signature here">
+            <input type="file" id="uploadSignature1" class="signature-upload" accept="image/*" style="display:none;" onchange="uploadSignature(1, event)">
+            <button type="button" class="clear-signature" onclick="clearSignature(1)">Clear Signature 1</button>
 
-            <label for="signDate1">Date:</label>
+            <label for="signDate1">Date (Signature 1):</label>
             <input type="date" id="signDate1" name="signDate1" required>
 
             <!-- Hidden Input to store the signature image -->
             <input type="hidden" name="signatureImage1" id="signatureImage1">
+
+            <h2>Second Tenant Signature</h2>
+            <label for="tenantName2">Tenant Name (print) (2nd):</label>
+            <input type="text" id="tenantName2" name="tenantName2">
+
+            <!-- Signature Toggle -->
+            <div class="signature-toggle-buttons">
+                <button type="button" id="drawButton2" class="active" onclick="switchSignatureMode(2, 'draw')">Draw Signature 2</button>
+                <button type="button" id="typeButton2" onclick="switchSignatureMode(2, 'type')">Type Signature 2</button>
+                <button type="button" id="uploadButton2" onclick="switchSignatureMode(2, 'upload')">Upload Signature 2</button>
+            </div>
+
+            <!-- Signature Canvas 2 -->
+            <canvas class="signature-box" id="signatureCanvas2"></canvas>
+            <input type="text" class="signature-text" id="typedSignature2" placeholder="Type your signature here">
+            <input type="file" id="uploadSignature2" class="signature-upload" accept="image/*" style="display:none;" onchange="uploadSignature(2, event)">
+            <button type="button" class="clear-signature" onclick="clearSignature(2)">Clear Signature 2</button>
+
+            <label for="signDate2">Date (Signature 2):</label>
+            <input type="date" id="signDate2" name="signDate2">
+
+            <!-- Hidden Input to store the second signature image -->
+            <input type="hidden" name="signatureImage2" id="signatureImage2">
 
             <button type="submit">Submit</button>
         </form>
@@ -202,76 +225,99 @@
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script>
-        const canvas = document.getElementById("signatureCanvas");
-        const ctx = canvas.getContext("2d");
-        const typedSignatureInput = document.getElementById("typedSignature");
-        const drawSignatureButton = document.getElementById("drawButton");
-        const typeSignatureButton = document.getElementById("typeButton");
-        const uploadSignatureButton = document.getElementById("uploadButton");
-        const uploadInput = document.getElementById("uploadSignature");
+        let drawing1 = false, drawing2 = false;
+        let uploadedImage1 = null, uploadedImage2 = null;
 
-        let drawing = false;
-        let uploadedImage = null;
+        const canvas1 = document.getElementById("signatureCanvas1");
+        const ctx1 = canvas1.getContext("2d");
+        const typedSignatureInput1 = document.getElementById("typedSignature1");
+        const uploadInput1 = document.getElementById("uploadSignature1");
 
-        // Function to get mouse position relative to the canvas
+        const canvas2 = document.getElementById("signatureCanvas2");
+        const ctx2 = canvas2.getContext("2d");
+        const typedSignatureInput2 = document.getElementById("typedSignature2");
+        const uploadInput2 = document.getElementById("uploadSignature2");
+
+        // Drawing functions for Canvas 1 and 2
         function getMousePos(canvas, event) {
             const rect = canvas.getBoundingClientRect();
-            const x = event.clientX - rect.left;
-            const y = event.clientY - rect.top;
-            return { x, y };
+            return { x: event.clientX - rect.left, y: event.clientY - rect.top };
         }
 
-        function startDrawing(event) {
-            if (!drawSignatureButton.classList.contains('active') || uploadedImage) return;
-            drawing = true;
-            const pos = getMousePos(canvas, event);
+        function startDrawing(event, tenant) {
+            if (tenant === 1 && !drawSignatureButton1.classList.contains('active')) return;
+            if (tenant === 2 && !drawSignatureButton2.classList.contains('active')) return;
+
+            const ctx = tenant === 1 ? ctx1 : ctx2;
+            const drawingFlag = tenant === 1 ? drawing1 : drawing2;
+
+            drawingFlag = true;
+            const pos = getMousePos(tenant === 1 ? canvas1 : canvas2, event);
             ctx.beginPath();
             ctx.moveTo(pos.x, pos.y);
         }
 
-        function draw(event) {
-            if (!drawing || !drawSignatureButton.classList.contains('active') || uploadedImage) return;
-            const pos = getMousePos(canvas, event);
+        function draw(event, tenant) {
+            if (tenant === 1 && !drawing1 || tenant === 2 && !drawing2) return;
+
+            const ctx = tenant === 1 ? ctx1 : ctx2;
+            const pos = getMousePos(tenant === 1 ? canvas1 : canvas2, event);
             ctx.lineTo(pos.x, pos.y);
             ctx.stroke();
         }
 
-        function stopDrawing() {
-            drawing = false;
+        function stopDrawing(tenant) {
+            if (tenant === 1) drawing1 = false;
+            if (tenant === 2) drawing2 = false;
         }
 
-        function clearSignature() {
+        // Signature Clear Functions for Both Tenants
+        function clearSignature(tenant) {
+            const ctx = tenant === 1 ? ctx1 : ctx2;
+            const canvas = tenant === 1 ? canvas1 : canvas2;
+            const typedInput = tenant === 1 ? typedSignatureInput1 : typedSignatureInput2;
+            const uploadInput = tenant === 1 ? uploadInput1 : uploadInput2;
+
             ctx.clearRect(0, 0, canvas.width, canvas.height);
-            typedSignatureInput.value = '';
+            typedInput.value = '';
             uploadedImage = null;
         }
 
-        function switchSignatureMode(mode) {
+        // Signature Mode Switch Functions
+        function switchSignatureMode(tenant, mode) {
+            const signatureBox = tenant === 1 ? canvas1 : canvas2;
+            const typedSignature = tenant === 1 ? typedSignatureInput1 : typedSignatureInput2;
+            const uploadInput = tenant === 1 ? uploadInput1 : uploadInput2;
+
+            const drawButton = tenant === 1 ? document.getElementById("drawButton1") : document.getElementById("drawButton2");
+            const typeButton = tenant === 1 ? document.getElementById("typeButton1") : document.getElementById("typeButton2");
+            const uploadButton = tenant === 1 ? document.getElementById("uploadButton1") : document.getElementById("uploadButton2");
+
             if (mode === 'draw') {
-                canvas.style.display = 'block';
-                typedSignatureInput.style.display = 'none';
+                signatureBox.style.display = 'block';
+                typedSignature.style.display = 'none';
                 uploadInput.style.display = 'none';
-                drawSignatureButton.classList.add('active');
-                typeSignatureButton.classList.remove('active');
-                uploadSignatureButton.classList.remove('active');
+                drawButton.classList.add('active');
+                typeButton.classList.remove('active');
+                uploadButton.classList.remove('active');
             } else if (mode === 'type') {
-                canvas.style.display = 'none';
-                typedSignatureInput.style.display = 'block';
+                signatureBox.style.display = 'none';
+                typedSignature.style.display = 'block';
                 uploadInput.style.display = 'none';
-                typeSignatureButton.classList.add('active');
-                drawSignatureButton.classList.remove('active');
-                uploadSignatureButton.classList.remove('active');
+                typeButton.classList.add('active');
+                drawButton.classList.remove('active');
+                uploadButton.classList.remove('active');
             } else if (mode === 'upload') {
-                canvas.style.display = 'none';
-                typedSignatureInput.style.display = 'none';
+                signatureBox.style.display = 'none';
+                typedSignature.style.display = 'none';
                 uploadInput.style.display = 'block';
-                uploadSignatureButton.classList.add('active');
-                drawSignatureButton.classList.remove('active');
-                typeSignatureButton.classList.remove('active');
+                uploadButton.classList.add('active');
+                drawButton.classList.remove('active');
+                typeButton.classList.remove('active');
             }
         }
 
-        function uploadSignature(event) {
+        function uploadSignature(tenant, event) {
             const file = event.target.files[0];
             if (file) {
                 const reader = new FileReader();
@@ -279,6 +325,8 @@
                     const img = new Image();
                     img.onload = function() {
                         uploadedImage = img;
+                        const ctx = tenant === 1 ? ctx1 : ctx2;
+                        const canvas = tenant === 1 ? canvas1 : canvas2;
                         ctx.clearRect(0, 0, canvas.width, canvas.height);
                         ctx.drawImage(uploadedImage, 0, 0, canvas.width, canvas.height);
                     };
@@ -292,9 +340,12 @@
         document.getElementById("checkoutForm").addEventListener("submit", async function (e) {
             e.preventDefault(); // prevent form from submitting immediately
 
-            // Step 1: Capture the signature and encode as base64 for submission
-            const signatureImage = canvas.toDataURL("image/png");
-            document.getElementById("signatureImage1").value = signatureImage;
+            // Step 1: Capture both signatures and encode as base64 for submission
+            const signatureImage1 = canvas1.toDataURL("image/png");
+            const signatureImage2 = canvas2.toDataURL("image/png");
+
+            document.getElementById("signatureImage1").value = signatureImage1;
+            document.getElementById("signatureImage2").value = signatureImage2;
 
             // Step 2: Generate the PDF
             await generatePDF();
@@ -308,15 +359,21 @@
             const pdf = new jsPDF();
 
             // Example data to include in the PDF
-            const tenantName = document.getElementById("tenantName1").value;
+            const tenantName1 = document.getElementById("tenantName1").value;
+            const tenantName2 = document.getElementById("tenantName2").value;
             const moveout = document.getElementById("moveout").value;
-            const signatureImage = document.getElementById("signatureImage1").value;
+            const signatureImage1 = document.getElementById("signatureImage1").value;
+            const signatureImage2 = document.getElementById("signatureImage2").value;
 
-            pdf.text(`Tenant Name: ${tenantName}`, 10, 10);
-            pdf.text(`Move-out Date: ${moveout}`, 10, 20);
+            pdf.text(`Tenant 1 Name: ${tenantName1}`, 10, 10);
+            pdf.text(`Tenant 2 Name: ${tenantName2}`, 10, 20);
+            pdf.text(`Move-out Date: ${moveout}`, 10, 30);
 
-            if (signatureImage) {
-                pdf.addImage(signatureImage, 'PNG', 10, 30, 60, 30);
+            if (signatureImage1) {
+                pdf.addImage(signatureImage1, 'PNG', 10, 40, 60, 30);
+            }
+            if (signatureImage2) {
+                pdf.addImage(signatureImage2, 'PNG', 10, 70, 60, 30);
             }
 
             // Save PDF (optional, if you want to download it)

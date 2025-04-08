@@ -350,5 +350,67 @@
     switchSignatureMode('draw', 2);
   }
 </script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
+    <!-- Your PDF generation and submission handling -->
+    <script>
+        document.getElementById("checkoutForm").addEventListener("submit", async function (e) {
+            e.preventDefault();
+
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF();
+
+            const form = e.target;
+
+            let y = 10;
+            const addText = (label, value) => {
+                doc.text(`${label}: ${value}`, 10, y);
+                y += 10;
+            };
+
+            addText("Property Address", form.property.value);
+            addText("Tenant/s", form.tenants.value);
+            if (form.secondTenant.value) {
+                addText("Second Tenant", form.secondTenant.value);
+            }
+            addText("Move-Out Date", form.moveout.value);
+
+            addText("Condition - Good?", form.good.checked ? "Yes" : "No");
+            addText("Minor Damages?", form.minor.checked ? "Yes" : "No");
+            if (form.minorDetails.value) {
+                addText("Minor Damage Details", form.minorDetails.value);
+            }
+            addText("Disrepair?", form.disrepair.checked ? "Yes" : "No");
+            if (form.disrepairDetails.value) {
+                addText("Disrepair Details", form.disrepairDetails.value);
+            }
+
+            addText("Gas Reading", form.gasReading.value);
+            addText("Gas Supplier", form.gasSupplier.value);
+            addText("Electricity Reading", form.electricReading.value);
+            addText("Electricity Supplier", form.electricSupplier.value);
+
+            addText("Tenant 1 Name", form.tenantName1.value);
+            addText("Tenant 1 Sign Date", form.signDate1.value);
+            if (form.signatureImage1.value) {
+                doc.addImage(form.signatureImage1.value, "PNG", 10, y, 50, 20);
+                y += 30;
+            }
+
+            if (form.tenantName2 && form.tenantName2.value) {
+                addText("Tenant 2 Name", form.tenantName2.value);
+                addText("Tenant 2 Sign Date", form.signDate2.value);
+                if (form.signatureImage2 && form.signatureImage2.value) {
+                    doc.addImage(form.signatureImage2.value, "PNG", 10, y, 50, 20);
+                    y += 30;
+                }
+            }
+
+            doc.save("tenant-checkout.pdf");
+
+            // Optional: then actually submit the form
+            form.submit();
+        });
+    </script>
 </body>
 </html>
